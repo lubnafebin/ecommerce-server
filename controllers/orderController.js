@@ -10,6 +10,20 @@ export const placedOrderCOD = async (req, res) => {
       return res.json({ success: false, message: "Invalid data" });
     }
 
+    // Check in-stock status
+    const products = await Product.find({
+      _id: { $in: items.map((i) => i.product) },
+    });
+
+    const hasOutOfStock = products.some((p) => !p.inStock);
+    if (hasOutOfStock) {
+      return res.json({
+        success: false,
+        message:
+          "Some items are out of stock. Please remove them before ordering.",
+      });
+    }
+
     //calculate amount using items
     let amount = await items.reduce(async (acc, item) => {
       const product = await Product.findById(item.product);
