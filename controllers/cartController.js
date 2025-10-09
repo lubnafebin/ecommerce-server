@@ -25,18 +25,24 @@ export const removeFromCart = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Filter out the product to remove it
-    user.cartItems = user.cartItems.filter(
-      (item) => item._id.toString() !== productId.toString()
-    );
+    // Check if product exists in the cart
+    if (user.cartItems && user.cartItems[productId]) {
+      // Remove the product key from the cartItems object
+      delete user.cartItems[productId];
 
-    await user.save();
+      await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Item removed from cart",
-      cartItems: user.cartItems,
-    });
+      return res.status(200).json({
+        success: true,
+        message: "Item removed from cart",
+        cartItems: user.cartItems,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in cart",
+      });
+    }
   } catch (error) {
     console.error("Error removing item from cart:", error);
     res.status(500).json({
