@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 import stripe from "stripe";
 
 //place order COD
@@ -145,6 +146,7 @@ export const stripeWebhooks = async (request, response) => {
 
       //mark payment as paid
       await Order.findByIdAndUpdate(orderId, { isPaid: true });
+      await User.findByIdAndUpdate(userId, { cartItems: {} });
       break;
     }
     case "payment_intent.payment_failed": {
